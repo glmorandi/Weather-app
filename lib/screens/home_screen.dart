@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:weather/helper/location_manager.dart';
 import 'weather_screen.dart';
+import 'package:weather/notifications/local.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -17,11 +20,13 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     _locationFuture = LocationManager.getCurrentLocation();
+    initializeNotifications();
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'Weather App',
       home: Scaffold(
         appBar: AppBar(

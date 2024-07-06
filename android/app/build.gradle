@@ -1,5 +1,8 @@
 plugins {
     id "com.android.application"
+    // START: FlutterFire Configuration
+    id 'com.google.gms.google-services'
+    // END: FlutterFire Configuration
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
@@ -30,6 +33,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
@@ -45,10 +49,11 @@ android {
         applicationId "com.example.weather"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion flutter.minSdkVersion
+        minSdkVersion 21
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -58,10 +63,23 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+
+    dependencies {
+        coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.2.2'
+    }
+
 }
 
 flutter {
     source '../..'
+}
+
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        if (details.requested.group == 'org.jetbrains.kotlin' && details.requested.name == 'kotlin-stdlib-jdk8') {
+            details.useTarget 'org.jetbrains.kotlin:kotlin-stdlib:1.8.10'
+        }
+    }
 }
 
 dependencies {}

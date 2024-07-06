@@ -1,9 +1,23 @@
-
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:weather/helper/api_service.dart';
+import 'package:weather/helper/location_manager.dart';
 import 'package:weather/helper/weather_service.dart';
 import 'package:weather/model/weather_data.dart';
+import 'package:weather/notifications/local.dart';
 import 'package:weather/screens/current.dart';
 import 'package:weather/screens/daily_screen.dart';
+
+void _generateNotification() async {
+Position? currentPosition;
+            currentPosition ??= await LocationManager.getCurrentLocation();
+          double latitude = currentPosition!.latitude;
+          double longitude = currentPosition!.longitude;
+          ApiService apiService = ApiService(latitude, longitude);
+          WeatherData weatherData = await apiService.fetchWeatherData();
+
+    await doNotification(weatherData);
+  }
 
 class WeatherScreen extends StatelessWidget {
   const WeatherScreen({super.key});
@@ -46,7 +60,6 @@ class _WeatherWidgetState extends State<WeatherWidget> {
           future: weatherData,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              // Display a loading indicator while waiting for data
               return const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -56,15 +69,17 @@ class _WeatherWidgetState extends State<WeatherWidget> {
               ],
               );
             } else if (snapshot.hasError) {
-              // Display an error message if there's an error
               return Text('Error: ${snapshot.error}');
             } else {
-              // Display the weather data once it's loaded
               final weatherData = snapshot.data!;
               return ListView(
                 children: [
                   CurrentWeatherScreen(weatherData),
                   DailyWeatherScreen(weatherData),
+                  const ElevatedButton(
+            onPressed: _generateNotification,
+            child: Text('Generate Notification'),
+          ),
                 ],
               );
             }
